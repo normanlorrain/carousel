@@ -1,0 +1,123 @@
+#!/usr/bin/python3
+import subprocess
+import time
+import logging as log
+
+import itertools 
+import collections
+import glob
+import signal
+import os
+# import pyinotify  #Does not work over SMB or shared folders. Need to poll; crap.
+import sys
+
+
+ROOT = os.path.dirname(os.path.abspath(__file__))
+FILELIST = os.path.join( ROOT, "photolist.txt") 
+photos = os.path.join(ROOT, "photos")
+
+
+def term(sig, frame):
+    global videoProcess
+    global unclutterProcess
+    print("sigterm")
+    stopProcesses()
+    sys.exit(0)
+signal.signal( signal.SIGTERM, term )
+
+
+def getPhotos( path ):
+    all = glob.glob('{}/*.jpg'.format( path) )
+    all.extend( glob.glob('{}/*.jpeg'.format( path) ) )
+    all.extend( glob.glob('{}/*.png'.format( path) ) )
+    
+    #print('chunk,' , all)
+    return all
+
+def buildPhotoList():
+    fileList = []
+
+    fileLevels = collections.defaultdict(list)
+    dirs = glob.glob('{}/*.[0-9]'.format(photos))
+    #print(dirs)
+    for i in dirs:
+        number = int(i[-1])
+        fileLevels[number].extend ( getPhotos(i)  )
+
+    #print(fileLevels )
+
+
+    oneIter = itertools.cycle(fileLevels[1])  # Take from this one until the other is empty
+    twoIter = iter(fileLevels[2])
+    try:
+        while True:
+            fileList.append(next(oneIter))
+            fileList.append(next(twoIter))
+            fileList.append(next(twoIter))
+            fileList.append(next(twoIter))
+    except StopIteration:
+        pass
+
+    return fileList
+
+
+def writePhotoList( filelist ):
+    with open(FILELIST, 'w') as f:
+        for line in filelist:
+            f.write( line ) 
+            f.write('\n')
+    
+
+
+def startProcesses():
+    global videoProcess
+    global unclutterProcess
+
+    #This is the Gnome alternative: eog = "/usr/bin/eog -f -s "
+    # using feh instead.
+    videoCmd = "/usr/bin/feh -F -Z -D 5 -f {}".format(FILELIST)  # -F -Z 
+    videoProcess = subprocess.Popen(videoCmd, shell = True)
+
+    unclutterProcess = subprocess.Popen("/usr/bin/unclutter", shell = True)
+
+def stopProcesses():
+    videoProcess.send_signal( signal.SIGTERM)
+    unclutterProcess.send_signal(signal.SIGTERM)
+
+photoList = buildPhotoList()
+writePhotoList(photoList)
+
+
+
+startProcesses()
+
+
+
+while True:
+
+    # notifier.loop() # Loop forever and handle events.
+    # print('notifier done')
+
+
+    try:
+        time.sleep(10) 
+        newphotoList = buildPhotoList()
+
+        if photoList != newphotoList:
+            photoList = newphotoList
+            print('detected changes')
+            writePhotoList( photoList )
+            stopProcesses()
+            startProcesses()
+        else:
+            print('no change')
+            
+
+
+    except KeyboardInterrupt:
+        term(None, None)
+
+    
+
+
+
