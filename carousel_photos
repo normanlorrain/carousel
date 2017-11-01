@@ -1,29 +1,10 @@
 #!/usr/bin/python3
-import subprocess
-import time
-import logging as log
-
-import itertools 
-import collections
-import glob
-import signal
-import os
-# import pyinotify  #Does not work over SMB or shared folders. Need to poll; crap.
-import sys
-
+from carousel_common import *
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FILELIST = os.path.join( ROOT, "photolist.txt") 
 photos = os.path.join(ROOT, "photos")
 
-
-def term(sig, frame):
-    global videoProcess
-    global unclutterProcess
-    print("sigterm")
-    stopProcesses()
-    sys.exit(0)
-signal.signal( signal.SIGTERM, term )
 
 
 def getPhotos( path ):
@@ -60,62 +41,68 @@ def buildPhotoList():
 
     return fileList
 
+supervisor = Supervisor(FILELIST, buildPhotoList)
+supervisor.startProcess( ["/usr/bin/feh","-F","-Z","-D","5","-f",FILELIST ]) 
+supervisor.startProcess( ["/usr/bin/unclutter"] )
+supervisor.monitor()
 
-def writePhotoList( filelist ):
-    with open(FILELIST, 'w') as f:
-        for line in filelist:
-            f.write( line ) 
-            f.write('\n')
+
+
+# def writePhotoList( filelist ):
+#     with open(FILELIST, 'w') as f:
+#         for line in filelist:
+#             f.write( line ) 
+#             f.write('\n')
     
 
 
-def startProcesses():
-    global videoProcess
-    global unclutterProcess
+# def startProcesses():
+#     global videoProcess
+#     global unclutterProcess
 
-    #This is the Gnome alternative: eog = "/usr/bin/eog -f -s "
-    # using feh instead.
-    videoCmd = "/usr/bin/feh -F -Z -D 5 -f {}".format(FILELIST)  # -F -Z 
-    videoProcess = subprocess.Popen(videoCmd, shell = True)
+#     #This is the Gnome alternative: eog = "/usr/bin/eog -f -s "
+#     # using feh instead.
+#     videoCmd = "/usr/bin/feh -F -Z -D 5 -f {}".format(FILELIST)  # -F -Z 
+#     videoProcess = subprocess.Popen(videoCmd, shell = True)
 
-    unclutterProcess = subprocess.Popen("/usr/bin/unclutter", shell = True)
+#     unclutterProcess = subprocess.Popen("/usr/bin/unclutter", shell = True)
 
-def stopProcesses():
-    videoProcess.send_signal( signal.SIGTERM)
-    unclutterProcess.send_signal(signal.SIGTERM)
+# def stopProcesses():
+#     videoProcess.send_signal( signal.SIGTERM)
+#     unclutterProcess.send_signal(signal.SIGTERM)
 
-photoList = buildPhotoList()
-writePhotoList(photoList)
-
-
-
-startProcesses()
+# photoList = buildPhotoList()
+# writePhotoList(photoList)
 
 
 
-while True:
-
-    # notifier.loop() # Loop forever and handle events.
-    # print('notifier done')
+# startProcesses()
 
 
-    try:
-        time.sleep(10) 
-        newphotoList = buildPhotoList()
 
-        if photoList != newphotoList:
-            photoList = newphotoList
-            print('detected changes')
-            writePhotoList( photoList )
-            stopProcesses()
-            startProcesses()
-        else:
-            print('no change')
+# while True:
+
+#     # notifier.loop() # Loop forever and handle events.
+#     # print('notifier done')
+
+
+#     try:
+#         time.sleep(10) 
+#         newphotoList = buildPhotoList()
+
+#         if photoList != newphotoList:
+#             photoList = newphotoList
+#             print('detected changes')
+#             writePhotoList( photoList )
+#             stopProcesses()
+#             startProcesses()
+#         else:
+#             print('no change')
             
 
 
-    except KeyboardInterrupt:
-        term(None, None)
+#     except KeyboardInterrupt:
+#         term(None, None)
 
     
 

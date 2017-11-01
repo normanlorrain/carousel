@@ -1,90 +1,19 @@
 #!/usr/bin/python3
-import subprocess
-import time
-import logging as log
-
-import itertools 
-import collections
-import glob
-import signal
-import os
-# import pyinotify  #Does not work over SMB or shared folders. Need to poll; crap.
-import sys
-
+from carousel_common import *
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FILELIST = os.path.join( ROOT, "musiclist.txt") 
 music = os.path.join(ROOT, "music")
 
-
-
-def term(sig, frame):
-    global audioProcess
-    print("sigterm")
-    stopProcesses()
-    sys.exit(0)
-signal.signal( signal.SIGTERM, term )
-
-
-
-def writeMusicList( filelist ):
-    with open(FILELIST, 'w') as f:
-        for line in filelist:
-            f.write( line ) 
-            f.write('\n')
-    
-
-    
+   
 def buildMusicList():
-    musicList = [] 
-
     files = glob.glob('{}/*.ON/*'.format(music))
     return files
 
+supervisor = Supervisor(FILELIST, buildMusicList)
 
-
-
-#print(music, buildMusicList())
-
-
-def startProcesses():
-    global audioProcess
-    #audioProcess = subprocess.Popen( ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST])
-    audioProcess = subprocess.Popen( ['/usr/bin/mpv', '--loop-playlist', '--playlist={}'.format(FILELIST)] )
-    print('started', audioProcess)
-
-
-def stopProcesses():
-    print('stopping', audioProcess)
-    audioProcess.terminate()
-    audioProcess.wait()
-
-musicList = buildMusicList()
-writeMusicList(musicList)
-
-startProcesses()
-
-
-while True:
-    try:
-        time.sleep(10) 
-        newMusicList = buildMusicList()
-
-        if musicList != newMusicList:
-            musicList = newMusicList
-            print('detected changes')
-            writeMusicList( musicList )
-            stopProcesses()
-            startProcesses()
-        else:
-            print('no change')
-            
-
-
-    except KeyboardInterrupt:
-        term(None, None)
-
-    
+supervisor.startProcess(['/usr/bin/mpv', '--really-quiet', '--loop=inf', '--playlist={}'.format(FILELIST)])#alternative:  ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST]
+supervisor.monitor()
 
 
 
