@@ -1,5 +1,11 @@
 #!/usr/bin/python3
+import logging as log 
 from carousel_common import *
+
+log.basicConfig(level=log.DEBUG,
+                    format='%(asctime)s %(levelname)s %(message)s',
+                    filename='/tmp/carousel_photos.log',
+                    filemode='w')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FILELIST = os.path.join( ROOT, "photolist.txt") 
