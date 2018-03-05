@@ -23,18 +23,18 @@ class Supervisor():
         signal.signal( signal.SIGTERM, self.term )
 
     def term(self, sig, frame):
-        print("sigterm")
+        log.info("sigterm")
         self.stopProcesses()
         sys.exit(0)
 
     def startProcess(self, arglist):
         proc = subprocess.Popen( arglist )
-        print('started', proc)
+        log.info('started {}'.format(proc) )
         self.processList.append( proc )
 
     def stopProcesses(self):
         for i in self.processList:
-            print('stopping', i)
+            log.info('stopping {}'.format(i) )
             i.terminate()
             i.wait()
 
@@ -63,11 +63,11 @@ class Supervisor():
 
                 if self.itemList != newList:
                     self.itemList = newList
-                    print('detected changes')
+                    log.info('detected changes')
                     self.writeList( self.itemList )
                     self.restartProcesses()
                 else:
-                    print('no change')
+                    log.debug('no change')
                     
 
 

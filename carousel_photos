@@ -2,7 +2,7 @@
 import logging as log 
 from carousel_common import *
 
-log.basicConfig(level=log.DEBUG,
+log.basicConfig(level=log.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename='/tmp/carousel_photos.log',
                     filemode='w')
@@ -18,7 +18,7 @@ def getPhotos( path ):
     all.extend( glob.glob('{}/*.jpeg'.format( path) ) )
     all.extend( glob.glob('{}/*.png'.format( path) ) )
     
-    #print('chunk,' , all)
+    log.debug( 'chunk,{}'.format(all) )
     return all
 
 def buildPhotoList():
@@ -26,12 +26,12 @@ def buildPhotoList():
 
     fileLevels = collections.defaultdict(list)
     dirs = glob.glob('{}/*.[0-9]'.format(photos))
-    #print(dirs)
+    log.debug('{}'.format(dirs) )
     for i in dirs:
         number = int(i[-1])
         fileLevels[number].extend ( getPhotos(i)  )
 
-    #print(fileLevels )
+    log.debug('{}'.format(fileLevels) )
 
 
     oneIter = itertools.cycle(fileLevels[1])  # Take from this one until the other is empty
@@ -47,9 +47,12 @@ def buildPhotoList():
 
     return fileList
 
-supervisor = Supervisor(FILELIST, buildPhotoList)
-supervisor.startProcess( ["/usr/bin/feh","-F","-Z","-D","5","-f",FILELIST ]) 
-supervisor.startProcess( ["/usr/bin/unclutter"] )
-supervisor.monitor()
+try:
+	supervisor = Supervisor(FILELIST, buildPhotoList)
+	supervisor.startProcess( ["/usr/bin/feh","-F","-Z","-D","5","-f",FILELIST ]) 
+	supervisor.startProcess( ["/usr/bin/unclutter"] )
+	supervisor.monitor()
+except Exception as e:
+	log.exception(e)
 
 

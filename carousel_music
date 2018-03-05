@@ -2,7 +2,7 @@
 import logging as log
 from carousel_common import *
 
-log.basicConfig(level=log.DEBUG,
+log.basicConfig(level=log.INFO,
                     format='%(asctime)s %(levelname)s %(message)s',
                     filename='/tmp/carousel_music.log',
                     filemode='w')
@@ -16,10 +16,13 @@ def buildMusicList():
     files = glob.glob('{}/*.ON/*'.format(music))
     return files
 
-supervisor = Supervisor(FILELIST, buildMusicList)
+try:
+	supervisor = Supervisor(FILELIST, buildMusicList)
 
-supervisor.startProcess(['/usr/bin/mpv', '--really-quiet', '--loop=inf', '--playlist={}'.format(FILELIST)])#alternative:  ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST]
-supervisor.monitor()
+	supervisor.startProcess(['/usr/bin/mpv', '--really-quiet', '--loop=inf', '--playlist={}'.format(FILELIST)])#alternative:  ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST]
+	supervisor.monitor()
+except Exception as e:
+	log.exception(e)
 
 
 
