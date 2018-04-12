@@ -1,11 +1,13 @@
 #!/usr/bin/python3
-import logging as log 
+import log
+import os
+import itertools
+import collections
+import glob
+
 from carousel_common import *
 
-log.basicConfig(level=log.INFO,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='/tmp/carousel_photos.log',
-                    filemode='w')
+log.init( '/tmp/carousel_photos.log')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FILELIST = os.path.join( ROOT, "photolist.txt") 
@@ -14,21 +16,24 @@ photos = os.path.join(ROOT, "photos")
 
 
 def getPhotos( path ):
+    log.debug( 'getphotos {}'.format( path ) )
     all = glob.glob('{}/*.jpg'.format( path) )
     all.extend( glob.glob('{}/*.jpeg'.format( path) ) )
     all.extend( glob.glob('{}/*.png'.format( path) ) )
-    
-    log.debug( 'chunk,{}'.format(all) )
     return all
 
 def buildPhotoList():
+    log.debug('buildphotolist')
     fileList = []
 
     fileLevels = collections.defaultdict(list)
-    dirs = glob.glob('{}/*.[0-9]'.format(photos))
+    photoDirs = glob.glob( '{}/*.[0-9]'.format(photoDir) )
     log.debug('{}'.format(dirs) )
-    for i in dirs:
+
+    log.debug('photoDirs: {}'.format(photoDirs) )
+    for i in photoDirs:
         number = int(i[-1])
+        log.debug( 'found a level {} '.format(number))
         fileLevels[number].extend ( getPhotos(i)  )
 
     log.debug('{}'.format(fileLevels) )
