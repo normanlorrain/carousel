@@ -10,7 +10,7 @@ getLogger('').setLevel(DEBUG)
 
 def init( filename ):
     filehandler = FileHandler(filename,mode='w')
-    filehandler.setLevel(DEBUG)
+    filehandler.setLevel(INFO)
     filehandler.setFormatter(Formatter(LONGFORMAT))
     getLogger('').addHandler(filehandler) 
     info('logging initialized')

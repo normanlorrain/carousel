@@ -5,13 +5,13 @@ import itertools
 import collections
 import glob
 
-from carousel_common import *
+import carousel_common
 
 log.init( '/tmp/carousel_photos.log')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+PHOTOROOT = os.path.join(ROOT, "photos")
 FILELIST = os.path.join( ROOT, "photolist.txt") 
-photos = os.path.join(ROOT, "photos")
 
 
 
@@ -27,16 +27,16 @@ def buildPhotoList():
     fileList = []
 
     fileLevels = collections.defaultdict(list)
-    photoDirs = glob.glob( '{}/*.[0-9]'.format(photoDir) )
-    log.debug('{}'.format(dirs) )
-
+    photoDirs = glob.glob( '{}/*.[0-9]'.format(PHOTOROOT) )
     log.debug('photoDirs: {}'.format(photoDirs) )
     for i in photoDirs:
         number = int(i[-1])
         log.debug( 'found a level {} '.format(number))
         fileLevels[number].extend ( getPhotos(i)  )
 
-    log.debug('{}'.format(fileLevels) )
+    for level in fileLevels.keys():
+        for filename in fileLevels[level]:
+            log.debug('{} : {}'.format(level, filename) )
 
 
     oneIter = itertools.cycle(fileLevels[1])  # Take from this one until the other is empty
@@ -53,7 +53,7 @@ def buildPhotoList():
     return fileList
 
 try:
-	supervisor = Supervisor(FILELIST, buildPhotoList)
+	supervisor = carousel_common.Supervisor(FILELIST, buildPhotoList)
 	supervisor.startProcess( ["/usr/bin/feh","-F","-Z","-D","5","-f",FILELIST ]) 
 	supervisor.startProcess( ["/usr/bin/unclutter"] )
 	supervisor.monitor()
