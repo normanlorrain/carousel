@@ -53,6 +53,9 @@ def buildPhotoList():
     return fileList
 
 try:
+	my_env = os.environ
+	my_env["DISPLAY"] = ":0"
+
 	supervisor = carousel_common.Supervisor(FILELIST, buildPhotoList)
 	supervisor.startProcess( ["/usr/bin/feh","-F","-Z","-D","5","-f",FILELIST ]) 
 	supervisor.startProcess( ["/usr/bin/unclutter"] )
