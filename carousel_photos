@@ -38,9 +38,10 @@ def buildPhotoList():
         for filename in fileLevels[level]:
             log.debug('{} : {}'.format(level, filename) )
 
-
-    oneIter = itertools.cycle(fileLevels[1])  # Take from this one until the other is empty
-    twoIter = iter(fileLevels[2])
+    oneIter = iter(fileLevels[1])
+    twoIter = itertools.cycle(fileLevels[2])  # Take from this one until the other is empty
+    if len(fileLevels[1]) * 3 > len(fileLevels[2]):
+        log.warn('we could use more stock photos here')
     try:
         while True:
             fileList.append(next(oneIter))
@@ -49,6 +50,10 @@ def buildPhotoList():
             fileList.append(next(twoIter))
     except StopIteration:
         pass
+
+    log.debug('COMPLETE LIST')
+    for f in fileList:
+        log.debug('   {}'.format(f))
 
     return fileList
 

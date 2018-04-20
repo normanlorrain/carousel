@@ -1,7 +1,7 @@
 from logging import *
 
 # set up logging to file - see previous section for more details
-LONGFORMAT='%(levelname)8s: ''%(filename)-20s: ''%(lineno)4d:\t''%(message)s'
+LONGFORMAT='%(levelname)8s: ''%(datefmt)''%(filename)-20s: ''%(lineno)4d:\t''%(message)s'
 SHORTFORMAT='%(levelname)-8s: %(message)s'
 
 # Root logger gets everything.  Handlers defined below will filter it out...
