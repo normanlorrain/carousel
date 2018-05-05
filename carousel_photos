@@ -1,12 +1,13 @@
 #!/usr/bin/python3
-import log
+# randomimport carousel.log as log
 import os
-import itertools
-import collections
-import glob
-import random
+# import itertools
+# import collections
+# import glob
+# import 
 
 import carousel
+from carousel import log
 
 log.init( '/tmp/carousel_photos.log')
 
@@ -18,9 +19,8 @@ try:
     my_env = os.environ
     my_env["DISPLAY"] = ":0"
 
-    supervisor = carousel.Supervisor(PHOTOROOT, FILELIST, buildPhotoList)
+    supervisor = carousel.Supervisor(PHOTOROOT, FILELIST, carousel.buildPhotoList)
     process = ["/usr/bin/feh","-Y","-F","-Z","-D","5","-f",FILELIST ]
-    process = ['/usr/bin/xclock']
     supervisor.startProcess( process )
     supervisor.monitor()
 except Exception as e:

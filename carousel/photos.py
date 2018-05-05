@@ -9,7 +9,9 @@ import os
 import random
 # import pyinotify  #Does not work over SMB or shared folders. Need to poll; crap.
 import sys
-import log
+
+
+from . import log
 
 def getPhotos( path ):
     log.debug( 'getphotos {}'.format( path ) )

@@ -8,7 +8,9 @@ import signal
 import os
 # import pyinotify  #Does not work over SMB or shared folders. Need to poll; crap.
 import sys
-import log
+
+
+from . import log
 
 class Supervisor():
     def __init__( self, watchDir, listfile, updateListFn ):
@@ -85,3 +87,8 @@ class Supervisor():
 
 
 
+def main():
+    print("test")
+
+if __name__ == '__main__':
+    main()
