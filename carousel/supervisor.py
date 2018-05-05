@@ -1,6 +1,5 @@
 import subprocess
 import time
-import logging as log
 
 import itertools 
 import collections
@@ -9,15 +8,15 @@ import signal
 import os
 # import pyinotify  #Does not work over SMB or shared folders. Need to poll; crap.
 import sys
-
-
-
+import log
 
 class Supervisor():
-    def __init__( self, listfile, updateListFn ):
+    def __init__( self, watchDir, listfile, updateListFn ):
+        self.watchDir = watchDir
+        self.dirTime = os.path.getmtime(self.watchDir)
         self.listfile = listfile
         self.updateListFn = updateListFn
-        self.itemList = self.updateListFn()
+        self.itemList = self.updateListFn( self.watchDir )
         self.writeList( self.itemList )
         self.processList = []
         signal.signal( signal.SIGTERM, self.term )
@@ -53,17 +52,27 @@ class Supervisor():
                 f.write( line ) 
                 f.write('\n')
 
+    def detectChanges(self):
+        mtimes = []
+        for root, _, _ in os.walk(self.watchDir):
+            mtimes.append(os.path.getmtime(root))
 
+        # Get the latest mod time
+        newTime = max(mtimes)
+
+        if self.dirTime != newTime:
+            self.dirTime = newTime
+            return True
+        else:
+            return False
 
     def monitor(self):
         while True:
             try:
                 time.sleep(10) 
-                newList = self.updateListFn()
-
-                if self.itemList != newList:
-                    self.itemList = newList
+                if self.detectChanges():
                     log.info('detected changes')
+                    self.itemList = self.updateListFn(self.watchDir)
                     self.writeList( self.itemList )
                     self.restartProcesses()
                 else:
@@ -74,4 +83,5 @@ class Supervisor():
             except KeyboardInterrupt:
                 self.term(None, None)
 
-        
+
+
