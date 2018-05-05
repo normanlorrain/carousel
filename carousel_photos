@@ -1,11 +1,5 @@
 #!/usr/bin/python3
-# randomimport carousel.log as log
 import os
-# import itertools
-# import collections
-# import glob
-# import 
-
 import carousel
 from carousel import log
 

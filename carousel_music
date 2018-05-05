@@ -1,23 +1,23 @@
 #!/usr/bin/python3
-import logging as log
-from carousel_common import *
+import os
+import glob
 
-log.basicConfig(level=log.INFO,
-                    format='%(asctime)s %(levelname)s %(message)s',
-                    filename='/tmp/carousel_music.log',
-                    filemode='w')
+import carousel
+from carousel import log
+
+log.init( '/tmp/carousel_music.log')
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 FILELIST = os.path.join( ROOT, "musiclist.txt") 
-music = os.path.join(ROOT, "music")
+MUSIC_DIR = os.path.join(ROOT, "music")
 
    
-def buildMusicList():
-    files = glob.glob('{}/*.ON/*'.format(music))
+def buildMusicList(musicDir):
+    files = glob.glob('{}/*.ON/*'.format(musicDir))
     return files
 
 try:
-	supervisor = Supervisor(FILELIST, buildMusicList)
+	supervisor = carousel.Supervisor(MUSIC_DIR, FILELIST, buildMusicList)
 
 	supervisor.startProcess(['/usr/bin/mpv', '--really-quiet', '--loop-playlist=inf', '--playlist={}'.format(FILELIST)])#alternative:  ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST]
 	supervisor.monitor()
