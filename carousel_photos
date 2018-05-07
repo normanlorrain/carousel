@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import os
-import carousel
-from carousel import log
+import util
+from util import log
 
 log.init( '/tmp/carousel_photos.log')
 
@@ -13,9 +13,9 @@ try:
     my_env = os.environ
     my_env["DISPLAY"] = ":0"
 
-    supervisor = carousel.Supervisor(PHOTOROOT, FILELIST, carousel.buildPhotoList)
-    process = ["/usr/bin/feh","-Y","-F","-Z","-D","5","-f",FILELIST ]
-    supervisor.startProcess( process )
+    supervisor = util.Supervisor(PHOTOROOT, FILELIST, util.buildPhotoList)
+    processArgs = ["/usr/bin/feh","-Y","-F","-Z","-D","5","-f", FILELIST ]
+    supervisor.startProcess( processArgs )
     supervisor.monitor()
 except Exception as e:
     log.exception(e)

@@ -2,8 +2,8 @@
 import os
 import glob
 
-import carousel
-from carousel import log
+import util
+from util import log
 
 log.init( '/tmp/carousel_music.log')
 
@@ -17,12 +17,13 @@ def buildMusicList(musicDir):
     return files
 
 try:
-	supervisor = carousel.Supervisor(MUSIC_DIR, FILELIST, buildMusicList)
-
-	supervisor.startProcess(['/usr/bin/mpv', '--really-quiet', '--loop-playlist=inf', '--playlist={}'.format(FILELIST)])#alternative:  ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST]
+	supervisor = util.Supervisor(MUSIC_DIR, FILELIST, buildMusicList)
+	#alternative:  ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST]
+    processArgs = ['/usr/bin/mpv', '--really-quiet', '--loop-playlist=inf', '--playlist={}'.format(FILELIST)]
+	supervisor.startProcess( processArgs )
 	supervisor.monitor()
 except Exception as e:
-	log.exception(e)
+	log.exception(e)util
 
 
 
