@@ -14,12 +14,12 @@ from . import log
 
 class Supervisor():
     def __init__( self, watchDir, listfile, updateListFn ):
-        self.watchDir = watchDir
-        self.dirTime = os.path.getmtime(self.watchDir)
-        self.listfile = listfile
+        self.inputWatchDir = watchDir
+        self.outputListFile = listfile
         self.updateListFn = updateListFn
-        self.itemList = self.updateListFn( self.watchDir )
-        self.writeList( self.itemList )
+        self.dirTime = os.path.getmtime(self.inputWatchDir)
+        
+        self.updateOutputList()
         self.processList = []
         signal.signal( signal.SIGTERM, self.term )
 
@@ -46,17 +46,16 @@ class Supervisor():
         for i in oldList:
             self.startProcess(i.args)
 
-
-
-    def writeList(self, itemlist ):
-        with open(self.listfile, 'w') as f:
-            for line in itemlist:
+    def updateOutputList(self):
+        itemList =  self.updateListFn(self.inputWatchDir)
+        with open(self.outputListFile, 'w') as f:
+            for line in itemList:
                 f.write( line ) 
                 f.write('\n')
 
     def detectChanges(self):
         mtimes = []
-        for root, _, _ in os.walk(self.watchDir):
+        for root, _, _ in os.walk(self.inputWatchDir):
             mtimes.append(os.path.getmtime(root))
 
         # Get the latest mod time
@@ -74,8 +73,7 @@ class Supervisor():
                 time.sleep(10) 
                 if self.detectChanges():
                     log.info('detected changes')
-                    self.itemList = self.updateListFn(self.watchDir)
-                    self.writeList( self.itemList )
+                    self.updateOutputList()
                     self.restartProcesses()
                 else:
                     log.debug('no change')

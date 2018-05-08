@@ -19,11 +19,11 @@ def buildMusicList(musicDir):
 try:
 	supervisor = util.Supervisor(MUSIC_DIR, FILELIST, buildMusicList)
 	#alternative:  ['/usr/bin/mplayer', '-nolirc', '-msglevel', 'all=3', '-loop', '0', '-playlist', FILELIST]
-    processArgs = ['/usr/bin/mpv', '--really-quiet', '--loop-playlist=inf', '--playlist={}'.format(FILELIST)]
+	processArgs = ['/usr/bin/mpv', '--really-quiet', '--loop-playlist=inf', '--playlist={}'.format(FILELIST)]
 	supervisor.startProcess( processArgs )
 	supervisor.monitor()
 except Exception as e:
-	log.exception(e)util
+	log.exception(e)
 
 
 
