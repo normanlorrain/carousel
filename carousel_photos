@@ -62,8 +62,8 @@ try:
 	my_env["DISPLAY"] = ":0"
 
 	supervisor = carousel_common.Supervisor(FILELIST, buildPhotoList)
-	supervisor.startProcess( ["/usr/bin/feh","-F","-Z","-D","5","-f",FILELIST ]) 
-	supervisor.startProcess( ["/usr/bin/unclutter"] )
+	supervisor.startProcess( ["/usr/bin/feh","-Y","-F","-Z","-D","5","-f",FILELIST ]) 
+	#supervisor.startProcess( ["/usr/bin/unclutter"] )
 	supervisor.monitor()
 except Exception as e:
 	log.exception(e)
