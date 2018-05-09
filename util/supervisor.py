@@ -21,6 +21,7 @@ class Supervisor():
         
         self.updateOutputList()
         self.processList = []
+        self.argsList = []
         signal.signal( signal.SIGTERM, self.term )
 
     def term(self, sig, frame):
@@ -28,30 +29,35 @@ class Supervisor():
         self.stopProcesses()
         sys.exit(0)
 
-    def startProcess(self, arglist):
-        proc = subprocess.Popen( arglist )
-        log.info('started {}'.format(proc) )
+    def startProcess(self, args ):
+        self.argsList.append( args )
+        proc = subprocess.Popen( args  )
+        log.info(f'started PID:{proc.pid} ARGS: {args}')
         self.processList.append( proc )
 
     def stopProcesses(self):
-        for i in self.processList:
-            log.info('stopping {}'.format(i) )
-            i.terminate()
-            i.wait()
+        for proc in self.processList:
+            log.info(f'stopping PID:{proc.pid} ARGS: {proc.args}')
+            proc.terminate()
+            proc.wait()
 
     def restartProcesses(self):
-        oldList = self.processList
-        self.stopProcesses()
+        savedArgsList = self.argsList
+        self.argsList = []
         self.processList = []
-        for i in oldList:
-            self.startProcess(i.args)
+        for i in savedArgsList:
+            self.startProcess(i)
 
     def updateOutputList(self):
+        log.debug('updateOutputList')
         itemList =  self.updateListFn(self.inputWatchDir)
         with open(self.outputListFile, 'w') as f:
-            for line in itemList:
-                f.write( line ) 
-                f.write('\n')
+            if itemList:
+                for line in itemList:
+                    f.write( line ) 
+                    f.write('\n')
+            else:
+                log.error("nothing to put into output list file")
 
     def detectChanges(self):
         mtimes = []
@@ -73,6 +79,7 @@ class Supervisor():
                 time.sleep(10) 
                 if self.detectChanges():
                     log.info('detected changes')
+                    self.stopProcesses()
                     self.updateOutputList()
                     self.restartProcesses()
                 else:

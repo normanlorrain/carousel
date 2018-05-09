@@ -12,6 +12,7 @@ import sys
 
 
 from . import log
+from . import reglob
 
 def getPhotos( path ):
     log.debug( 'getphotos {}'.format( path ) )
@@ -25,7 +26,7 @@ def buildPhotoList(photoRoot):
     fileList = []
 
     fileLevels = collections.defaultdict(list)
-    photoDirs = glob.glob( '{}/*.[0-9][0-9]'.format(photoRoot) )
+    photoDirs = reglob.reglob( photoRoot, r'.*\.[0-9]+' )
     log.debug(photoDirs)
     log.debug('photoDirs: {}'.format(photoDirs) )
     for i in photoDirs:
@@ -33,9 +34,11 @@ def buildPhotoList(photoRoot):
         log.debug( 'found a level {} '.format(number))
         fileLevels[number].extend ( getPhotos(i)  )
 
-    for level in fileLevels.keys():
-        for filename in fileLevels[level]:
-            log.debug('{} : {}'.format(level, filename) )
+    if len(fileLevels) == 0:
+        return None
+    # for level in fileLevels.keys():
+    #     for filename in fileLevels[level]:
+    #         log.debug('{} : {}'.format(level, filename) )
     
     weightedIterators = {}
     for level in fileLevels.keys():
