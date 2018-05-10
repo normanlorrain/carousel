@@ -30,9 +30,10 @@ def buildPhotoList(photoRoot):
     log.debug(photoDirs)
     log.debug('photoDirs: {}'.format(photoDirs) )
     for i in photoDirs:
-        number = float(i[-2:])/100
-        log.debug( 'found a level {} '.format(number))
-        fileLevels[number].extend ( getPhotos(i)  )
+        dirname,ext = os.path.splitext(i)
+        weight = float(ext)
+        log.debug( f'Directory {dirname}, weight {weight} ')
+        fileLevels[weight].extend ( getPhotos(i)  )
 
     if len(fileLevels) == 0:
         return None
