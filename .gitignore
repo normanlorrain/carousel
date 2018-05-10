@@ -104,3 +104,7 @@ ENV/
 
 music/
 photos/
+
+~*
+photolist.txt
+musiclist.txt
